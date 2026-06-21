@@ -1,3 +1,4 @@
+import { userRouter } from './modules/user/user.route';
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import config from "./config";
@@ -13,7 +14,11 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended : true }));
-app.use(cookieParser())
+app.use(cookieParser());
+
+// route middleware
+app.use("/api/users", userRouter);
+
 
 // root route
 app.get("/", (req:Request, res:Response)=>{

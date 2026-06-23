@@ -1,9 +1,11 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../../lib/prisma";
 import { ILogin } from "./auth.interface";
-import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
+import { JwtPayload, SignOptions } from "jsonwebtoken";
 import config from "../../config";
-import { createToken } from "../../utils/jwt";
+import { jwtUtils } from "../../utils/jwt";
+import { ActiveStatus } from "../../../generated/prisma/enums";
+
 
 // login user
 const loginUserIntoDB = async (payload: ILogin) => {
@@ -12,6 +14,10 @@ const loginUserIntoDB = async (payload: ILogin) => {
   const user = await prisma.user.findUniqueOrThrow({
     where: { email },
   });
+
+  if(user.activeStatus === ActiveStatus.BLOCKED){
+       throw new Error("Your account has been Blocked. Please contact support."); 
+  };
 
   const isPasswordMatch = await bcrypt.compare(password, user?.password);
 
@@ -24,16 +30,16 @@ const loginUserIntoDB = async (payload: ILogin) => {
     id: user.id,
     name: user.name,
     email: user.email,
-    activeStatus: user.activeStatus,
+    role: user.role
   } as JwtPayload;
 
-  const accessToken = createToken(
+  const accessToken = jwtUtils.createToken(
     jwtPayload,
     config.jwt_access_secret,
     config.jwt_access_expires_in as SignOptions,
   );
 
-  const refreshToken = createToken(
+  const refreshToken = jwtUtils.createToken(
     jwtPayload,
     config.jwt_refresh_secret,
     config.jwt_refresh_expires_in as SignOptions,

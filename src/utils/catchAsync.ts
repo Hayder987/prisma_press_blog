@@ -12,7 +12,8 @@ export const catchAsync = (fn: RequestHandler) => {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
         success: false,
         statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-        message: (error as Error).message,
+        message: "Something Went Wrong",
+        error: (error as Error).message
       });
     }
   };

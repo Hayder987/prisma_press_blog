@@ -4,6 +4,7 @@ import cors from "cors";
 import config from "./config";
 import cookieParser from "cookie-parser";
 import httpStatus from "http-status";
+import { authRouter } from "./modules/auth/auth.route";
 
 const app: Application = express();
 
@@ -19,9 +20,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// route middleware
+//User route middleware
 app.use("/api/users", userRouter);
-
+app.use("/api/auth", authRouter);
 
 // root route
 app.get("/", (req: Request, res: Response) => {

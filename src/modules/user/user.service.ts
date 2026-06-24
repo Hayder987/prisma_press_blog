@@ -1,6 +1,10 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../../lib/prisma";
-import { IRegisterUser, IUpdateUserMe } from "./user.interface";
+import {
+  IRegisterUser,
+  IUpdateUserAdmin,
+  IUpdateUserMe,
+} from "./user.interface";
 import config from "../../config";
 
 // register user into db
@@ -58,30 +62,64 @@ const getMyProfileFromDB = async (userId: string) => {
 };
 
 // update user
-const updateUserIntoDB = async(userId:string, payload:IUpdateUserMe)=>{
-const {name, profilePhoto, bio} = payload; 
+const updateUserIntoDB = async (userId: string, payload: IUpdateUserMe) => {
+  const { name, profilePhoto, bio } = payload;
 
-const updateUser = await prisma.user.update({
-  where : {id: userId},
-  data: {
-    name,
-    profile:{
-      update :{
-        profilePhoto,
-        bio
-      }
-    }
-  },
-  include :{
-    profile : true
-  }
-});
+  const updateUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      name,
+      profile: {
+        update: {
+          profilePhoto,
+          bio,
+        },
+      },
+    },
+    omit: { password: true },
+    include: {
+      profile: true,
+    },
+  });
 
-return updateUser
+  return updateUser;
+};
+
+// update user by admin
+
+const updateUserByAdminIntoDB = async (
+  userId: string,
+  payload: IUpdateUserAdmin,
+) => {
+  const { name, role, profilePhoto, bio, activeStatus } = payload;
+
+  const updateUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      name,
+      role,
+      activeStatus,
+      profile: {
+        update: {
+          profilePhoto,
+          bio,
+        },
+      },
+    },
+    omit: {
+      password: true,
+    },
+    include: {
+      profile: true,
+    },
+  });
+
+  return updateUser;
 };
 
 export const userService = {
   createUserIntoDB,
   getMyProfileFromDB,
-  updateUserIntoDB
+  updateUserIntoDB,
+  updateUserByAdminIntoDB,
 };

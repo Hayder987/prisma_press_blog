@@ -26,8 +26,7 @@ const createUser = catchAsync(
 // get single profile
 const getMyProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-   
-    const {id} = req.user as JwtPayload
+    const { id } = req.user as JwtPayload;
 
     const user = await userService.getMyProfileFromDB(id);
 
@@ -40,7 +39,26 @@ const getMyProfile = catchAsync(
   },
 );
 
+// update user profile
+
+const updateUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payload = req.body;
+    const { id } = req.user as JwtPayload;
+
+    const updateUser = await userService.updateUserIntoDB(id, payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User Retrieved successfully",
+      data: updateUser,
+    });
+  },
+);
+
 export const userController = {
   createUser,
-  getMyProfile
+  getMyProfile,
+  updateUser,
 };

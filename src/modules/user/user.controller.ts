@@ -72,9 +72,24 @@ const updateUserByAdmin = catchAsync(
   },
 );
 
+// delete many user
+const deleteManyUsers = catchAsync(
+ async (req: Request, res: Response, next: NextFunction) =>{
+   const result = await userService.deleteManyUsersIntoDB(req.body.ids);
+
+   sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "All User Deleted successfully!",
+      data: result,
+    });
+ } 
+);
+
 export const userController = {
   createUser,
   getMyProfile,
   updateUser,
-  updateUserByAdmin
+  updateUserByAdmin,
+  deleteManyUsers
 };

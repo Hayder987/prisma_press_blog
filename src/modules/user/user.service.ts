@@ -6,6 +6,7 @@ import {
   IUpdateUserMe,
 } from "./user.interface";
 import config from "../../config";
+import { deletedUserLogs } from "../../utils/logs.deleted.user";
 
 // register user into db
 const createUserIntoDB = async (payload: IRegisterUser) => {
@@ -86,7 +87,6 @@ const updateUserIntoDB = async (userId: string, payload: IUpdateUserMe) => {
 };
 
 // update user by admin
-
 const updateUserByAdminIntoDB = async (
   userId: string,
   payload: IUpdateUserAdmin,
@@ -117,9 +117,43 @@ const updateUserByAdminIntoDB = async (
   return updateUser;
 };
 
+// delete many user
+const deleteManyUsersIntoDB = async (ids: string[]) => {
+  const users = await prisma.user.findMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+  });
+
+  if (!users.length) {
+    throw new Error("Users not found");
+  };
+
+  await prisma.user.deleteMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+  });
+
+
+  for (const user of users) {
+    await deletedUserLogs({name:user.name, email:user.email, role: user.role});
+  }
+
+  return {
+    count: users.length,
+  };
+};
+
+
 export const userService = {
   createUserIntoDB,
   getMyProfileFromDB,
   updateUserIntoDB,
   updateUserByAdminIntoDB,
+  deleteManyUsersIntoDB
 };

@@ -62,6 +62,18 @@ const getMyProfileFromDB = async (userId: string) => {
   return user;
 };
 
+// get all user
+const getAllUserFromDB = async () =>{
+   const result = await prisma.user.findMany({
+    omit: {password: true},
+    include:{
+      profile: true
+    }
+   });
+
+   return result;
+};
+
 // update user
 const updateUserIntoDB = async (userId: string, payload: IUpdateUserMe) => {
   const { name, profilePhoto, bio } = payload;
@@ -178,6 +190,7 @@ const deleteUserByIdIntoDB = async (userId: string) => {
 export const userService = {
   createUserIntoDB,
   getMyProfileFromDB,
+  getAllUserFromDB,
   updateUserIntoDB,
   updateUserByAdminIntoDB,
   deleteManyUsersIntoDB,

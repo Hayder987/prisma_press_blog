@@ -37,6 +37,21 @@ const getMyProfile = catchAsync(
   },
 );
 
+// get all user 
+const getAllUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) =>{
+  
+   const result = await userService.getAllUserFromDB();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "All User Retrieve successfully",
+      data: result,
+    });
+  }
+);
+
 // update user profile
 const updateUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -103,6 +118,7 @@ const deleteUserById = catchAsync(
 export const userController = {
   createUser,
   getMyProfile,
+  getAllUser,
   updateUser,
   updateUserByAdmin,
   deleteManyUsers,

@@ -27,4 +27,5 @@ type QueryFilter<T> = Partial<T>;
 export type TGetAllUserQuery = QueryFilter<{
   emails: string[];
   role: Role;
+  year: number;
 }>;

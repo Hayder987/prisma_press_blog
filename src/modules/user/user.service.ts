@@ -65,10 +65,10 @@ const getMyProfileFromDB = async (userId: string) => {
 
 // get all user
 const getAllUserFromDB = async (queryData: TGetAllUserQuery) => {
-  const { emails, role } = queryData || {};
+  const { emails, role , year} = queryData || {};
 
   const where: any = {};
-
+  
   // Email filter
   if (emails && emails?.length > 0) {
     where.email = {
@@ -79,7 +79,16 @@ const getAllUserFromDB = async (queryData: TGetAllUserQuery) => {
   // Role filter
   if (role) {
     where.role = role;
-  }
+  };
+
+   if (year) {
+    where.createdAt = {
+      gte: new Date(`${year}-01-01T00:00:00.000Z`),
+      lt: new Date(`${Number(year) + 1}-01-01T00:00:00.000Z`),
+    };
+  };
+
+  console.log(where);
 
   const result = await prisma.user.findMany({
     where,

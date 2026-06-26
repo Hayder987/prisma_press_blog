@@ -4,6 +4,7 @@ import {
   IRegisterUser,
   IUpdateUserAdmin,
   IUpdateUserMe,
+  TGetAllUserQuery,
 } from "./user.interface";
 import config from "../../config";
 import { deletedUserLogs } from "../../utils/logs.deleted.user";
@@ -63,15 +64,41 @@ const getMyProfileFromDB = async (userId: string) => {
 };
 
 // get all user
-const getAllUserFromDB = async () =>{
-   const result = await prisma.user.findMany({
-    omit: {password: true},
-    include:{
-      profile: true
-    }
-   });
+const getAllUserFromDB = async (queryData: TGetAllUserQuery) => {
+  const { emails, role } = queryData || {};
 
-   return result;
+  const where: any = {};
+
+  // Email filter
+  if (emails && emails?.length > 0) {
+    where.email = {
+      in: emails,
+    };
+  }
+
+  // Role filter
+  if (role) {
+    where.role = role;
+  }
+
+  const result = await prisma.user.findMany({
+    where,
+    orderBy: {
+      id: "desc",
+    },
+    omit: {
+      password: true,
+    },
+    include: {
+      profile: true,
+    },
+  });
+
+  const total = await prisma.user.count({
+    where
+  });
+
+  return {result, total};
 };
 
 // update user
@@ -174,7 +201,7 @@ const deleteUserByIdIntoDB = async (userId: string) => {
     throw new Error("User not found");
   }
 
-  const result =await prisma.user.delete({
+  const result = await prisma.user.delete({
     where: { id: userId },
   });
 

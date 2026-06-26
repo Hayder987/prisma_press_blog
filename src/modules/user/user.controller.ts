@@ -41,13 +41,16 @@ const getMyProfile = catchAsync(
 const getAllUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) =>{
   
-   const result = await userService.getAllUserFromDB();
+   const {result, total} = await userService.getAllUserFromDB(req.body);
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: "All User Retrieve successfully",
       data: result,
+      meta:{
+        total : total
+      }
     });
   }
 );

@@ -1,7 +1,7 @@
 type TMeta = {
-    page: number;
-    limit: number;
-    total: number;
+    page?: number;
+    limit?: number;
+    total?: number;
 };
 
 export type TResponse <T> = {

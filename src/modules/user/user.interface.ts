@@ -20,4 +20,11 @@ export interface IUpdateUserAdmin {
   bio?: string;
   activeStatus?: ActiveStatus;
   role?: Role;
-}
+};
+
+type QueryFilter<T> = Partial<T>;
+
+export type TGetAllUserQuery = QueryFilter<{
+  emails: string[];
+  role: Role;
+}>;

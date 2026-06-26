@@ -129,7 +129,7 @@ const deleteManyUsersIntoDB = async (ids: string[]) => {
 
   if (!users.length) {
     throw new Error("Users not found");
-  };
+  }
 
   await prisma.user.deleteMany({
     where: {
@@ -139,9 +139,12 @@ const deleteManyUsersIntoDB = async (ids: string[]) => {
     },
   });
 
-
   for (const user of users) {
-    await deletedUserLogs({name:user.name, email:user.email, role: user.role});
+    await deletedUserLogs({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    });
   }
 
   return {
@@ -149,11 +152,34 @@ const deleteManyUsersIntoDB = async (ids: string[]) => {
   };
 };
 
+// delete user by single
+const deleteUserByIdIntoDB = async (userId: string) => {
+  const userExists = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!userExists) {
+    throw new Error("User not found");
+  }
+
+  const result =await prisma.user.delete({
+    where: { id: userId },
+  });
+
+  await deletedUserLogs({
+    name: result?.name,
+    email: result?.email,
+    role: result?.role,
+  });
+
+  return result;
+};
 
 export const userService = {
   createUserIntoDB,
   getMyProfileFromDB,
   updateUserIntoDB,
   updateUserByAdminIntoDB,
-  deleteManyUsersIntoDB
+  deleteManyUsersIntoDB,
+  deleteUserByIdIntoDB,
 };

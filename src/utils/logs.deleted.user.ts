@@ -1,8 +1,9 @@
 
 import fs from "fs/promises";
 import path from "path";
+import { IDeletedUserLog } from "./utils.type";
 
-export const deletedUserLogs = async (result: any) => {
+export const deletedUserLogs = async (result: IDeletedUserLog) => {
   const logDir = path.join(process.cwd(), "logs");
   await fs.mkdir(logDir, { recursive: true });
 

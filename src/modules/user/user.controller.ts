@@ -68,22 +68,36 @@ const updateUserByAdmin = catchAsync(
       message: "User Update successfully",
       data: updateUser,
     });
-
   },
 );
 
 // delete many user
 const deleteManyUsers = catchAsync(
- async (req: Request, res: Response, next: NextFunction) =>{
-   const result = await userService.deleteManyUsersIntoDB(req.body.ids);
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await userService.deleteManyUsersIntoDB(req.body.ids);
 
-   sendResponse(res, {
+    sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
       message: "All User Deleted successfully!",
       data: result,
     });
- } 
+  },
+);
+
+//delete single user by id
+const deleteUserById = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const result = await userService.deleteUserByIdIntoDB(id as string);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "User Deleted successfully!",
+      data: result,
+    });
+  },
 );
 
 export const userController = {
@@ -91,5 +105,6 @@ export const userController = {
   getMyProfile,
   updateUser,
   updateUserByAdmin,
-  deleteManyUsers
+  deleteManyUsers,
+  deleteUserById,
 };

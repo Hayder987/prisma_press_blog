@@ -11,3 +11,9 @@ export type TResponse <T> = {
    data: T,
    meta?: TMeta 
 };
+
+export interface IDeletedUserLog {
+    name: string,
+    email: string,
+    role: string
+};

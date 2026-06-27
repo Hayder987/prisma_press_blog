@@ -81,6 +81,7 @@ const getAllUserFromDB = async (queryData: TGetAllUserQuery) => {
     where.role = role;
   };
 
+  // email filter
    if (year) {
     where.createdAt = {
       gte: new Date(`${year}-01-01T00:00:00.000Z`),

@@ -6,7 +6,6 @@ import config from "../../config";
 import { jwtUtils } from "../../utils/jwt";
 import { ActiveStatus } from "../../../generated/prisma/enums";
 
-
 // login user
 const loginUserIntoDB = async (payload: ILogin) => {
   const { email, password } = payload;
@@ -15,9 +14,9 @@ const loginUserIntoDB = async (payload: ILogin) => {
     where: { email },
   });
 
-  if(user.activeStatus === ActiveStatus.BLOCKED){
-       throw new Error("Your account has been Blocked. Please contact support."); 
-  };
+  if (user.activeStatus === ActiveStatus.BLOCKED) {
+    throw new Error("Your account has been Blocked. Please contact support.");
+  }
 
   const isPasswordMatch = await bcrypt.compare(password, user?.password);
 
@@ -30,7 +29,7 @@ const loginUserIntoDB = async (payload: ILogin) => {
     id: user.id,
     name: user.name,
     email: user.email,
-    role: user.role
+    role: user.role,
   } as JwtPayload;
 
   const accessToken = jwtUtils.createToken(
@@ -48,6 +47,46 @@ const loginUserIntoDB = async (payload: ILogin) => {
   return { accessToken, refreshToken };
 };
 
+// refreshToken
+const refreshTokenToAccess = async (refreshToken: string) => {
+  if (!refreshToken) {
+    throw new Error("refreshToken Not Found");
+  }
+
+  const decodedRefreshToken = jwtUtils.verifyToken(
+    refreshToken,
+    config.jwt_refresh_secret,
+  );
+
+  if (!decodedRefreshToken.success) {
+    throw new Error("Invalid Refresh Token");
+  }
+
+  const { id } = decodedRefreshToken.data as JwtPayload;
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
+
+  const jwtPayload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  } as JwtPayload;
+
+  const accessToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in as SignOptions,
+  );
+
+  return {accessToken}
+};
+
 export const authService = {
   loginUserIntoDB,
+  refreshTokenToAccess,
 };

@@ -14,7 +14,7 @@ const createComment = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
-      message: "Comment post successfully",
+      message: "Comment created successfully",
       data: {comment},
     });
     }

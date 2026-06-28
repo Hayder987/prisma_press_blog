@@ -37,7 +37,18 @@ const getAllPosts = catchAsync(
 
 // get post by id
 const getPostById = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {},
+  async (req: Request, res: Response, next: NextFunction) => {
+    const postId = req.params.postId;
+
+    const post = await postService.getPostByIdFromDB(postId as string);
+
+     sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "post Retrieve successfully",
+      data: {post},
+    });
+  },
 );
 
 const updatePost = catchAsync(

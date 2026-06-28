@@ -28,6 +28,9 @@ const getAllPosts = async () => {
       },
       comments: true,
     },
+    orderBy :{
+        createdAt : "desc"
+    }
   });
   return posts;
 };
@@ -101,7 +104,7 @@ const updatePostByIdIntoDB = async (
       id: postId,
     },
     data: {
-        ...payload
+      ...payload,
     },
     include: {
       author: {
@@ -116,9 +119,33 @@ const updatePostByIdIntoDB = async (
   return result;
 };
 
+// delete post by admin
+const deletePostByIdIntoDB = async (
+  postId: string,
+  isAdmin: boolean,
+  userId: string,
+) => {
+  const post = await prisma.post.findUniqueOrThrow({
+    where: {
+      id: postId,
+    },
+  });
+
+  if(!isAdmin && post.authorId !== userId){
+    throw new Error("You are not the owner of this post!")
+  };
+
+  await prisma.post.delete({
+    where: {
+      id: postId,
+    },
+  });
+};
+
 export const postService = {
   createPostIntoDB,
   getAllPosts,
   getPostByIdFromDB,
   updatePostByIdIntoDB,
+  deletePostByIdIntoDB,
 };

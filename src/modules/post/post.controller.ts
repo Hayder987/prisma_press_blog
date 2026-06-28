@@ -81,7 +81,6 @@ const updatePost = catchAsync(
 // delete post by id
 const deletePost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-
     const postId = req.params.postId;
     const isAdmin = req.user?.role === "ADMIN";
     const userId = req.user?.id;
@@ -90,7 +89,11 @@ const deletePost = catchAsync(
       throw new Error("Required postId in Params");
     }
 
-    await postService.deletePostByIdIntoDB(postId as string, isAdmin, userId as string);
+    await postService.deletePostByIdIntoDB(
+      postId as string,
+      isAdmin,
+      userId as string,
+    );
 
     sendResponse(res, {
       success: true,
@@ -102,7 +105,17 @@ const deletePost = catchAsync(
 );
 
 const getPostsStats = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {},
+  async (req: Request, res: Response, next: NextFunction) => {
+
+    const result = await postService.getPostStatsFromDB();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Post Stats get successfully",
+      data: result,
+    });
+  },
 );
 
 const getMyPosts = catchAsync(

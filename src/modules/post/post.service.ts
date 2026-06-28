@@ -1,4 +1,4 @@
-import { CommentStatus } from "../../../generated/prisma/enums";
+import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { ICreatePostPayload, IUpdatePostPayload } from "./post.interface";
 
@@ -28,9 +28,9 @@ const getAllPosts = async () => {
       },
       comments: true,
     },
-    orderBy :{
-        createdAt : "desc"
-    }
+    orderBy: {
+      createdAt: "desc",
+    },
   });
   return posts;
 };
@@ -131,9 +131,9 @@ const deletePostByIdIntoDB = async (
     },
   });
 
-  if(!isAdmin && post.authorId !== userId){
-    throw new Error("You are not the owner of this post!")
-  };
+  if (!isAdmin && post.authorId !== userId) {
+    throw new Error("You are not the owner of this post!");
+  }
 
   await prisma.post.delete({
     where: {
@@ -142,10 +142,92 @@ const deletePostByIdIntoDB = async (
   });
 };
 
+// get post stats with using Promise all
+const getPostStatsFromDB = async () => {
+  const transactionResult = await prisma.$transaction(async (tx) => {
+    const [
+      totalPosts,
+      totalPublishedPosts,
+      totalDraftPosts,
+      totalArchivedPosts,
+      totalComments,
+      totalApprovedComments,
+      totalRejectedComments,
+      totalPostViewsAggregate,
+    ] = await Promise.all([
+      await tx.post.count(),
+
+      await tx.post.count({
+        where: {
+          status: PostStatus.PUBLISHED,
+        },
+      }),
+
+      await tx.post.count({
+        where: {
+          status: PostStatus.DRAFT,
+        },
+      }),
+
+      await tx.post.count({
+        where: {
+          status: PostStatus.ARCHIVED,
+        },
+      }),
+
+      await tx.comment.count(),
+
+      await tx.comment.count({
+        where: {
+          status: CommentStatus.APPROVED,
+        },
+      }),
+
+      await tx.comment.count({
+        where: {
+          status: CommentStatus.REJECT,
+        },
+      }),
+
+      await tx.post.aggregate({
+        _sum: {
+          views: true,
+        },
+        _max : {
+          views : true
+        },
+        _avg:{
+          views : true
+        }
+      }),
+
+    ]);
+
+    return {
+      totalPosts,
+      totalPublishedPosts,
+      totalDraftPosts,
+      totalArchivedPosts,
+      totalComments,
+      totalApprovedComments,
+      totalRejectedComments,
+      viewsData: {
+       totalView: totalPostViewsAggregate._sum.views,
+       avgView : Math.round(Number(totalPostViewsAggregate._avg.views)),
+       maxView : totalPostViewsAggregate._max.views,
+      },
+    };
+  });
+
+  return transactionResult
+
+};
+
 export const postService = {
   createPostIntoDB,
   getAllPosts,
   getPostByIdFromDB,
   updatePostByIdIntoDB,
   deletePostByIdIntoDB,
+  getPostStatsFromDB,
 };

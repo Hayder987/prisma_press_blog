@@ -119,7 +119,18 @@ const getPostsStats = catchAsync(
 );
 
 const getMyPosts = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {},
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user?.id;
+
+    const posts = await postService.getMyPostsFromDB(userId as string);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "post retrieve successfully",
+      data: {posts},
+    });
+  },
 );
 
 export const postController = {

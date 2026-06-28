@@ -193,14 +193,13 @@ const getPostStatsFromDB = async () => {
         _sum: {
           views: true,
         },
-        _max : {
-          views : true
+        _max: {
+          views: true,
         },
-        _avg:{
-          views : true
-        }
+        _avg: {
+          views: true,
+        },
       }),
-
     ]);
 
     return {
@@ -212,15 +211,35 @@ const getPostStatsFromDB = async () => {
       totalApprovedComments,
       totalRejectedComments,
       viewsData: {
-       totalView: totalPostViewsAggregate._sum.views,
-       avgView : Math.round(Number(totalPostViewsAggregate._avg.views)),
-       maxView : totalPostViewsAggregate._max.views,
+        totalView: totalPostViewsAggregate._sum.views,
+        avgView: Math.round(Number(totalPostViewsAggregate._avg.views)),
+        maxView: totalPostViewsAggregate._max.views,
       },
     };
   });
 
-  return transactionResult
+  return transactionResult;
+};
 
+// get my post
+const getMyPostsFromDB = async (userId: string) => {
+  const result = await prisma.post.findMany({
+    where: {
+      authorId: userId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      comments: true,
+      _count:{
+        select:{
+          comments: true
+        }
+      }
+    },
+  });
+  return result;
 };
 
 export const postService = {
@@ -230,4 +249,5 @@ export const postService = {
   updatePostByIdIntoDB,
   deletePostByIdIntoDB,
   getPostStatsFromDB,
+  getMyPostsFromDB,
 };

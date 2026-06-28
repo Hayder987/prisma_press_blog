@@ -1,8 +1,8 @@
-import  httpStatus  from 'http-status';
+import httpStatus from "http-status";
 import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { postService } from './post.service';
+import { postService } from "./post.service";
 
 // create post
 const createPost = catchAsync(
@@ -15,7 +15,7 @@ const createPost = catchAsync(
       success: true,
       statusCode: httpStatus.CREATED,
       message: "post create successfully",
-      data: {post},
+      data: { post },
     });
   },
 );
@@ -23,14 +23,13 @@ const createPost = catchAsync(
 // get all post
 const getAllPosts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-   
     const posts = await postService.getAllPosts();
 
-   sendResponse(res, {
+    sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
       message: "All post Retrieve successfully",
-      data: {posts},
+      data: { posts },
     });
   },
 );
@@ -42,17 +41,40 @@ const getPostById = catchAsync(
 
     const post = await postService.getPostByIdFromDB(postId as string);
 
-     sendResponse(res, {
+    sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
       message: "post Retrieve successfully",
-      data: {post},
+      data: { post },
     });
   },
 );
 
 const updatePost = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {},
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user?.id;
+    const isAdmin = req.user?.role === "ADMIN";
+    const payload = req.body;
+    const postId = req.params.postId;
+
+    if (!postId) {
+      throw new Error("Required postId in Params");
+    }
+
+    const updatePost = await postService.updatePostByIdIntoDB(
+      userId as string,
+      isAdmin,
+      payload,
+      postId as string,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "post Update successfully",
+      data: updatePost,
+    });
+  },
 );
 
 const deletePost = catchAsync(

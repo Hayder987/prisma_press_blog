@@ -1,6 +1,6 @@
 import { CommentStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
-import { ICreatePostPayload } from "./post.interface";
+import { ICreatePostPayload, IUpdatePostPayload } from "./post.interface";
 
 // create post
 const createPostIntoDB = async (
@@ -45,8 +45,7 @@ const getPostByIdFromDB = async (postId: string) => {
         },
       },
     });
-  
-  
+
     const post = await tx.post.findUniqueOrThrow({
       where: {
         id: postId,
@@ -80,11 +79,46 @@ const getPostByIdFromDB = async (postId: string) => {
   return transactionResult;
 };
 
+// update post by id
+const updatePostByIdIntoDB = async (
+  userId: string,
+  isAdmin: boolean,
+  payload: IUpdatePostPayload,
+  postId: string,
+) => {
+  const existPost = await prisma.post.findUniqueOrThrow({
+    where: {
+      id: postId,
+    },
+  });
 
+  if (!isAdmin && existPost.authorId !== userId) {
+    throw new Error("You are not the owner of this post!");
+  }
 
+  const result = await prisma.post.update({
+    where: {
+      id: postId,
+    },
+    data: {
+        ...payload
+    },
+    include: {
+      author: {
+        omit: {
+          password: true,
+        },
+      },
+      comments: true,
+    },
+  });
+
+  return result;
+};
 
 export const postService = {
   createPostIntoDB,
   getAllPosts,
   getPostByIdFromDB,
+  updatePostByIdIntoDB,
 };

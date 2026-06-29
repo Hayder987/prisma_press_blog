@@ -1,61 +1,61 @@
-import  httpStatus  from 'http-status';
+import httpStatus from "http-status";
 import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { commentService } from './comment.service';
+import { commentService } from "./comment.service";
 
 const createComment = catchAsync(
-    async(req:Request, res:Response, next:NextFunction)=>{
-     const userId = req.user?.id;
-     const payload = req.body;
-     
-     const comment = await commentService.createCommentIntoDB(userId, payload);
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user?.id;
+    const payload = req.body;
+
+    const comment = await commentService.createCommentIntoDB(userId, payload);
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
       message: "Comment created successfully",
-      data: {comment},
+      data: { comment },
     });
-    }
+  },
 );
 
 const getCommentByAuthorId = catchAsync(
-    async(req:Request, res:Response, next:NextFunction)=>{
+  async (req: Request, res: Response, next: NextFunction) => {
+    const authorId = req.params.authorId;
 
-    }
+    const comments = await commentService.getCommentByAuthorFromDB(authorId as string);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Author Comment Get successfully",
+      data: {comments},
+    });
+  },
 );
 
 const getCommentByCommentId = catchAsync(
-    async(req:Request, res:Response, next:NextFunction)=>{
-
-    }
+  async (req: Request, res: Response, next: NextFunction) => {},
 );
 
 const updateComment = catchAsync(
-    async(req:Request, res:Response, next:NextFunction)=>{
-
-    }
+  async (req: Request, res: Response, next: NextFunction) => {},
 );
 
 const deleteComment = catchAsync(
-    async(req:Request, res:Response, next:NextFunction)=>{
-
-    }
+  async (req: Request, res: Response, next: NextFunction) => {},
 );
 
 const moderateComment = catchAsync(
-    async(req:Request, res:Response, next:NextFunction)=>{
-
-    }
+  async (req: Request, res: Response, next: NextFunction) => {},
 );
 
 export const commentController = {
-    createComment,
-    getCommentByAuthorId,
-    getCommentByCommentId,
-    updateComment,
-    deleteComment,
-    moderateComment
-
-}
+  createComment,
+  getCommentByAuthorId,
+  getCommentByCommentId,
+  updateComment,
+  deleteComment,
+  moderateComment,
+};

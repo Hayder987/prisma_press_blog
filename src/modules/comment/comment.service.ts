@@ -67,15 +67,13 @@ const updateCommentByIdIntoDB = async (
   userId: string,
   commentId: string,
   payload: IUpdateCommentPayload,
-  isAdmin: boolean
+  isAdmin: boolean,
 ) => {
-
   const commentExist = await prisma.comment.findUniqueOrThrow({
     where: {
       id: commentId,
     },
   });
-
 
   if (!isAdmin && commentExist.authorId !== userId) {
     throw new Error("This is Not Your Comment");
@@ -93,11 +91,39 @@ const updateCommentByIdIntoDB = async (
   return result;
 };
 
+// delete comment by id
+const deleteCommentFromDBById = async (
+  commentId: string,
+  userId: string,
+  isAdmin: boolean,
+) => {
 
+  const commentData = await prisma.comment.findUniqueOrThrow({
+    where : {
+      id : commentId
+    },
+    select:{
+      id: true,
+      authorId : true
+    }
+  });
+
+  if(!isAdmin && commentData.authorId !== userId){
+    throw new Error("This is not your comment")
+  };
+
+   await prisma.comment.delete({
+    where : {
+      id: commentData.id
+    }
+  });
+
+};
 
 export const commentService = {
   createCommentIntoDB,
   getCommentByAuthorFromDB,
   getCommentByIdFromDB,
   updateCommentByIdIntoDB,
+  deleteCommentFromDBById,
 };

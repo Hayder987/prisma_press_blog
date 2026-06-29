@@ -89,7 +89,6 @@ const getAllUserFromDB = async (queryData: TGetAllUserQuery) => {
     };
   };
 
-  console.log(where);
 
   const result = await prisma.user.findMany({
     where,

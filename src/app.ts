@@ -7,6 +7,8 @@ import httpStatus from "http-status";
 import { authRouter } from "./modules/auth/auth.route";
 import { postRouter } from "./modules/post/post.route";
 import { commentRouter } from "./modules/comment/comment.route";
+import { notFound } from "./middlewares/notFound";
+import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 
 const app: Application = express();
 
@@ -37,5 +39,9 @@ app.get("/", (req: Request, res: Response) => {
     data: [],
   });
 });
+
+// error middleware
+app.use(notFound);
+app.use(globalErrorHandler);
 
 export default app;

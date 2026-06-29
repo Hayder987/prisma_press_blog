@@ -20,6 +20,7 @@ const createPostIntoDB = async (
 // get all posts
 const getAllPosts = async () => {
   const posts = await prisma.post.findMany({
+   
     include: {
       author: {
         omit: {

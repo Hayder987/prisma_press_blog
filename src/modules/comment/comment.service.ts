@@ -7,7 +7,7 @@ const createCommentIntoDB = async (userId: string, payload: any) => {
       id: payload?.postId,
     },
   });
-  
+
   const comment = await prisma.comment.create({
     data: {
       ...payload,
@@ -19,25 +19,50 @@ const createCommentIntoDB = async (userId: string, payload: any) => {
 };
 
 // get comment by authorID
-const getCommentByAuthorFromDB = async (authorId:string)=>{
+const getCommentByAuthorFromDB = async (authorId: string) => {
   const result = await prisma.comment.findMany({
-    where : {
-      authorId
+    where: {
+      authorId,
     },
-    include:{
-      post :{
-        select :{
+    include: {
+      post: {
+        select: {
           id: true,
-          title : true
-        }
-      }
-    }
+          title: true,
+        },
+      },
+    },
   });
-  return result
+  return result;
 };
 
+// get comment by comment id
+const getCommentByIdFromDB = async (commentId: string) => {
+  const result = await prisma.comment.findUniqueOrThrow({
+    where: {
+      id: commentId,
+    },
+    include: {
+      post: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+      author: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+  return result;
+};
 
 export const commentService = {
   createCommentIntoDB,
-  getCommentByAuthorFromDB
+  getCommentByAuthorFromDB,
+  getCommentByIdFromDB,
 };

@@ -1,5 +1,8 @@
 import { prisma } from "../../lib/prisma";
-import { IUpdateCommentPayload } from "./comment.interface";
+import {
+  IModerateCommentPayload,
+  IUpdateCommentPayload,
+} from "./comment.interface";
 
 // create comment
 const createCommentIntoDB = async (userId: string, payload: any) => {
@@ -97,27 +100,58 @@ const deleteCommentFromDBById = async (
   userId: string,
   isAdmin: boolean,
 ) => {
-
   const commentData = await prisma.comment.findUniqueOrThrow({
-    where : {
-      id : commentId
+    where: {
+      id: commentId,
     },
-    select:{
+    select: {
       id: true,
-      authorId : true
-    }
+      authorId: true,
+    },
   });
 
-  if(!isAdmin && commentData.authorId !== userId){
-    throw new Error("This is not your comment")
-  };
+  if (!isAdmin && commentData.authorId !== userId) {
+    throw new Error("This is not your comment");
+  }
 
-   await prisma.comment.delete({
-    where : {
-      id: commentData.id
-    }
+  await prisma.comment.delete({
+    where: {
+      id: commentData.id,
+    },
+  });
+};
+
+// update moderateComment status
+const moderateCommentIntoDB = async (
+  commentId: string,
+  payload: IModerateCommentPayload,
+) => {
+  const commentData = await prisma.comment.findUniqueOrThrow({
+    where: {
+      id: commentId,
+    },
+    select: {
+      id: true,
+      status: true,
+    },
   });
 
+  if (commentData.status === payload.status) {
+    throw new Error(
+      `Your provided status (${payload.status}) is already up to date.`,
+    );
+  }
+
+  const result = await prisma.comment.update({
+    where: {
+      id: commentData.id,
+    },
+    data: {
+      ...payload,
+    },
+  });
+
+  return result;
 };
 
 export const commentService = {
@@ -126,4 +160,5 @@ export const commentService = {
   getCommentByIdFromDB,
   updateCommentByIdIntoDB,
   deleteCommentFromDBById,
+  moderateCommentIntoDB,
 };

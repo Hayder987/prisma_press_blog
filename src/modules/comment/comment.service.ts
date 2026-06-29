@@ -1,4 +1,5 @@
 import { prisma } from "../../lib/prisma";
+import { IUpdateCommentPayload } from "./comment.interface";
 
 // create comment
 const createCommentIntoDB = async (userId: string, payload: any) => {
@@ -61,8 +62,42 @@ const getCommentByIdFromDB = async (commentId: string) => {
   return result;
 };
 
+// update comment by comment id
+const updateCommentByIdIntoDB = async (
+  userId: string,
+  commentId: string,
+  payload: IUpdateCommentPayload,
+  isAdmin: boolean
+) => {
+
+  const commentExist = await prisma.comment.findUniqueOrThrow({
+    where: {
+      id: commentId,
+    },
+  });
+
+
+  if (!isAdmin && commentExist.authorId !== userId) {
+    throw new Error("This is Not Your Comment");
+  }
+
+  const result = await prisma.comment.update({
+    where: {
+      id: commentId,
+    },
+    data: {
+      ...payload,
+    },
+  });
+
+  return result;
+};
+
+
+
 export const commentService = {
   createCommentIntoDB,
   getCommentByAuthorFromDB,
   getCommentByIdFromDB,
+  updateCommentByIdIntoDB,
 };

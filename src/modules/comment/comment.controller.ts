@@ -26,13 +26,15 @@ const getCommentByAuthorId = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const authorId = req.params.authorId;
 
-    const comments = await commentService.getCommentByAuthorFromDB(authorId as string);
+    const comments = await commentService.getCommentByAuthorFromDB(
+      authorId as string,
+    );
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
       message: "Author Comment Get successfully",
-      data: {comments},
+      data: { comments },
     });
   },
 );
@@ -42,7 +44,9 @@ const getCommentByCommentId = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const commentId = req.params.commentId;
 
-    const comment = await commentService.getCommentByIdFromDB(commentId as string);
+    const comment = await commentService.getCommentByIdFromDB(
+      commentId as string,
+    );
 
     sendResponse(res, {
       success: true,
@@ -53,8 +57,28 @@ const getCommentByCommentId = catchAsync(
   },
 );
 
+// update comment by comment id
 const updateComment = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {},
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user?.id;
+    const commentId = req.params.commentId;
+    const payload = req.body;
+    const isAdmin = req.user?.role === "ADMIN";
+
+    const result = await commentService.updateCommentByIdIntoDB(
+      userId as string,
+      commentId as string,
+      payload,
+      isAdmin as boolean,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Comment Update successfully",
+      data: result,
+    });
+  },
 );
 
 const deleteComment = catchAsync(

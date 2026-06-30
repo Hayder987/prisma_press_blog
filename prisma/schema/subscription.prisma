@@ -8,8 +8,7 @@ model Subscription {
     currentPeriodEnd DateTime
     status SubscriptionStatus @default(ACTIVE)
     
-    //  //stripe customer id
-    // stripeCustomerId String @unique
+    stripeCustomerId String @unique
 
     // stripeSubscriptionId String @unique
 

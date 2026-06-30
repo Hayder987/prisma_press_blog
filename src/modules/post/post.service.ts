@@ -89,8 +89,9 @@ const getAllPosts = async (query: IPostQuery) => {
     andConditions.push({
       status: query.status,
     });
-  }
+  };
 
+  
   const posts = await prisma.post.findMany({
     where: {
       AND: andConditions,

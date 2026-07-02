@@ -2,7 +2,11 @@ import Stripe from "stripe";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
-import { getPeriodEnd, handleCheckoutCompleted } from "./subscription.utils";
+import {
+  getPeriodEnd,
+  handleChangeSubscription,
+  handleCheckoutCompleted,
+} from "./subscription.utils";
 
 // create checkout session
 const createCheckoutSession = async (userId: string) => {
@@ -73,8 +77,10 @@ const handleWebhook = async (payload: Buffer, signature: string) => {
       break;
 
     case "customer.subscription.updated":
+      await handleChangeSubscription(event.data.object);
       break;
     case "customer.subscription.deleted":
+      await handleChangeSubscription(event.data.object);
       break;
 
     default:

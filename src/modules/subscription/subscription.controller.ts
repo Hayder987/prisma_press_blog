@@ -2,13 +2,12 @@ import httpStatus from "http-status";
 import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { subscriptionService } from "./subscription.service";
+import { subscriptionServices } from "./subscription.service";
 
 const createCheckoutSession = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.id;
-
-    const result = await subscriptionService.createCheckoutSession(userId as string)
+    const result = await subscriptionServices.createCheckoutSession(userId as string);
 
     sendResponse(res, {
       success: true,
@@ -19,6 +18,24 @@ const createCheckoutSession = catchAsync(
   },
 );
 
+const handleWebhook = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+
+    const event = req.body as Buffer;
+     const signature = req.headers['stripe-signature']!;
+
+     await subscriptionServices.handleWebhook(event, signature as string);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: "Webhook triggered successfully",
+      data: null,
+    });
+  },
+);
+
 export const subscriptionController = {
   createCheckoutSession,
+  handleWebhook,
 };

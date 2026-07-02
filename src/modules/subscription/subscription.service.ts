@@ -1,7 +1,10 @@
+import Stripe from "stripe";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
+import { getPeriodEnd, handleCheckoutCompleted } from "./subscription.utils";
 
+// create checkout session
 const createCheckoutSession = async (userId: string) => {
   const transactionResult = await prisma.$transaction(async (tx) => {
     const user = await tx.user.findUniqueOrThrow({
@@ -13,14 +16,17 @@ const createCheckoutSession = async (userId: string) => {
       },
     });
 
+    // old subscribe
     let stripeCustomerId = user.subscription?.stripeCustomerId;
 
     if (!stripeCustomerId) {
-      // new subscriber
+      // create new customer
       const customer = await stripe.customers.create({
-        email: user.email,
-        name: user.name,
-        metadata: { userId: user.id },
+        email: user?.email,
+        name: user?.name,
+        metadata: {
+          userId: user?.id,
+        },
       });
 
       stripeCustomerId = customer.id;
@@ -41,7 +47,7 @@ const createCheckoutSession = async (userId: string) => {
       metadata: { userId: user.id },
     });
 
-    return session.url;
+    return session?.url;
   });
 
   return {
@@ -49,6 +55,36 @@ const createCheckoutSession = async (userId: string) => {
   };
 };
 
-export const subscriptionService = {
+// handle webhook get subscription info
+const handleWebhook = async (payload: Buffer, signature: string) => {
+  const endpointSecret = config.stripe_webhook_secret;
+
+  const event = stripe.webhooks.constructEvent(
+    payload,
+    signature,
+    endpointSecret,
+  );
+
+  // Handle the event
+  switch (event.type) {
+    case "checkout.session.completed":
+      const session: Stripe.Checkout.Session = event.data.object;
+      await handleCheckoutCompleted(session);
+      break;
+
+    case "customer.subscription.updated":
+      break;
+    case "customer.subscription.deleted":
+      break;
+
+    default:
+      // Unexpected event type
+      console.log(`No events matched. Unhandled event type ${event.type}.`);
+      break;
+  }
+};
+
+export const subscriptionServices = {
   createCheckoutSession,
+  handleWebhook,
 };

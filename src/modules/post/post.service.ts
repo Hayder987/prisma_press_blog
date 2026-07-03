@@ -12,6 +12,21 @@ const createPostIntoDB = async (
   payload: ICreatePostPayload,
   userId: string,
 ) => {
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where : {
+      id: userId
+    },
+    include:{
+      subscription : true
+    }
+  });
+
+  if(payload.isPremium && user?.subscription?.status !== "ACTIVE"){
+    throw new Error("You are not a premium user. So You can not create Premium content")
+  }
+
+
   const result = await prisma.post.create({
     data: {
       ...payload,
@@ -91,6 +106,10 @@ const getAllPosts = async (query: IPostQuery) => {
     });
   };
 
+  andConditions.push({
+    isPremium : false
+  });
+
   
   const posts = await prisma.post.findMany({
     where: {
@@ -149,6 +168,7 @@ const getPostByIdFromDB = async (postId: string) => {
     const post = await tx.post.findUniqueOrThrow({
       where: {
         id: postId,
+        isPremium: false
       },
       include: {
         author: {
@@ -191,6 +211,24 @@ const updatePostByIdIntoDB = async (
       id: postId,
     },
   });
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where : {
+      id: userId
+    },
+    select : {
+      id : true,
+      subscription : {
+        select : {
+          status : true
+        }
+      }
+    }
+  });
+
+  if(existPost?.isPremium && user?.subscription?.status !== "ACTIVE"){
+    throw new Error("You are not a premium user. So You can not Update Premium content")
+  }
 
   if (!isAdmin && existPost.authorId !== userId) {
     throw new Error("You are not the owner of this post!");

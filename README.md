@@ -43,6 +43,30 @@ prisma/schema/
 └── enum.prisma           # Global Enums (Role, PostStatus, SubscriptionStatus, etc.)
 ```
 
+## 📁 Project Structure
+
+```text
+src/
+├── app/
+│   ├── config/
+│   ├── middlewares/
+│   ├── modules/
+│   │   ├── auth/
+│   │   ├── user/
+│   │   ├── profile/
+│   │   ├── post/
+│   │   ├── comment/
+│   │   └── subscription/
+│   ├── routes/
+│   ├── utils/
+│   └── interfaces/
+├── prisma/
+│   └── schema/
+├── logs/
+├── app.ts
+└── server.ts
+```
+
 ### 📊 Relationships Map
 
 ```

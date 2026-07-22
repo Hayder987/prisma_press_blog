@@ -131,6 +131,11 @@ const getAllPosts = async (query: IPostQuery) => {
         },
       },
       comments: true,
+      _count: {
+        select: {
+          comments: true,
+        },
+      },
     },
   });
 

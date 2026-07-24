@@ -3,7 +3,7 @@ import { prisma } from "../../lib/prisma";
 import { IPostQuery } from "../post/post.interface";
 
 const getPremiumPostFromDB = async (query: IPostQuery) => {
-  const limit = query?.limit ? Number(query?.limit) : 10;
+  const limit = query?.limit ? Number(query?.limit) : 6;
   const page = query?.page ? Number(query?.page) : 1;
   const skip = (page - 1) * limit;
   const sortBy = query?.sortBy ? query?.sortBy : "createdAt";
@@ -98,10 +98,10 @@ const getPremiumPostFromDB = async (query: IPostQuery) => {
   return {
     data: posts,
     meta: {
-      total: totalPostCount,
+      total: posts.length === 0 ? 0 : totalPostCount,
       limit: limit,
       page: page,
-      totalPage: Math.ceil(totalPostCount / limit),
+      totalPage: posts?.length === 0 ? 0 : Math.ceil(totalPostCount / limit),
     },
   };
 };

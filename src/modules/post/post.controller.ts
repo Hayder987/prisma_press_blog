@@ -9,13 +9,13 @@ const createPost = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req?.user?.id;
 
-    const post = await postService.createPostIntoDB(req.body, id);
+    const result = await postService.createPostIntoDB(req.body, id);
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
       message: "post create successfully",
-      data: { post },
+      data: result ,
     });
   },
 );
@@ -132,7 +132,7 @@ const getMyPosts = catchAsync(
       success: true,
       statusCode: httpStatus.CREATED,
       message: "post retrieve successfully",
-      data: {posts},
+      data: posts,
     });
   },
 );

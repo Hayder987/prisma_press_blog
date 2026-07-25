@@ -13,4 +13,11 @@ router.get(
   premiumController.getPremiumPosts,
 );
 
+router.get(
+  "/:id",
+  auth(Role.ADMIN, Role.AUTHOR, Role.USER),
+  premiumGuard(),
+  premiumController.getPremiumPostById,
+);
+
 export const premiumRouter = router;

@@ -4,6 +4,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { premiumServices } from "./premium.service";
 
+// get all premium post
 const getPremiumPosts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const query = req.query;
@@ -19,8 +20,26 @@ const getPremiumPosts = catchAsync(
   },
 );
 
+// get premium post by id
+
+const getPremiumPostById = catchAsync (
+  async (req: Request, res: Response, next: NextFunction) =>{
+    const {id} = req.params;
+
+    const result = await premiumServices.getPremiumPostByIdFromDB(id as string)
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Premium Post retrieved successfully",
+      data: result,
+    });
+  }
+)
+
 
 
 export const premiumController = {
   getPremiumPosts,
+  getPremiumPostById
 };

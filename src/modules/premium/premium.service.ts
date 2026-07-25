@@ -1,7 +1,9 @@
 import { PostWhereInput } from "./../../../generated/prisma/models/Post";
 import { prisma } from "../../lib/prisma";
 import { IPostQuery } from "../post/post.interface";
+import { CommentStatus } from "../../../generated/prisma/enums";
 
+// get all premium post
 const getPremiumPostFromDB = async (query: IPostQuery) => {
   const limit = query?.limit ? Number(query?.limit) : 6;
   const page = query?.page ? Number(query?.page) : 1;
@@ -106,6 +108,57 @@ const getPremiumPostFromDB = async (query: IPostQuery) => {
   };
 };
 
+// get premium news by id
+const getPremiumPostByIdFromDB = async (postId:string)=>{
+   const transactionResult = await prisma.$transaction(async (tx) => {
+      await tx.post.update({
+        where: {
+          id: postId,
+        },
+        data: {
+          views: {
+            increment: 1,
+          },
+        },
+      });
+  
+      const post = await tx.post.findUniqueOrThrow({
+        where: {
+          id: postId,
+          isPremium: true
+        },
+        include: {
+          author: {
+            omit: {
+              password: true,
+            },
+          },
+          comments: {
+            where: {
+              status: CommentStatus.APPROVED,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
+  
+          _count: {
+            select: {
+              comments: true,
+            },
+          },
+        },
+      });
+  
+      return post;
+    });
+  
+    return transactionResult;
+
+};
+
+
 export const premiumServices = {
   getPremiumPostFromDB,
+  getPremiumPostByIdFromDB
 };
